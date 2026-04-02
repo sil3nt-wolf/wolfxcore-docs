@@ -149,7 +149,50 @@ WantedBy=multi-user.target</code></pre>
     <pre><code>systemctl enable --now wings
 systemctl status wings</code></pre>
 
-    <h2>8 — Firewall rules</h2>
+    <h2>8 — Port allocations</h2>
+    <p>
+      Allocations are the IP + port combinations that Wings can assign to game servers.
+      Without them the panel refuses to create servers (<em>"allocation id is required"</em>).
+      Add them once per node; they are shared across all servers on that node.
+    </p>
+    <p>
+      Go to <strong>Admin → Nodes → xwolf-node-1 → Allocations</strong> and enter the node IP
+      with a port or range, then click <strong>Submit</strong>.
+      Alternatively, insert them directly via SQL (fastest for bulk setup):
+    </p>
+    <div class="pre-label">sql</div>
+    <pre><code><span class="cm">-- Run inside the wolfxcore database</span>
+INSERT INTO allocations (node_id, ip, ip_alias, port, created_at, updated_at)
+VALUES
+  (1, '161.97.100.158', 'node.xwolf.space', 25565, NOW(), NOW()),
+  (1, '161.97.100.158', 'node.xwolf.space', 25566, NOW(), NOW());
+<span class="cm">-- Or use a range — see installation guide for the full loop query</span></code></pre>
+
+    <h3>xwolf-node-1 — current allocation ranges</h3>
+    <div class="table-wrap">
+      <table>
+        <thead>
+          <tr><th>Port range</th><th>Count</th><th>Use</th></tr>
+        </thead>
+        <tbody>
+          <tr><td><code>7777 – 7810</code></td><td>34</td><td>ARK: Survival Evolved, general game servers</td></tr>
+          <tr><td><code>9987 – 10022</code></td><td>6</td><td>TeamSpeak 3 / voice servers</td></tr>
+          <tr><td><code>25565 – 25600</code></td><td>36</td><td>Minecraft (Vanilla, Paper, Spigot, BungeeCord)</td></tr>
+          <tr><td><code>27015 – 27050</code></td><td>36</td><td>Rust, CS2, other Steam games</td></tr>
+          <tr><td><code>30000 – 30049</code></td><td>50</td><td>Node.js bots, Discord bots, APIs, general purpose</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <div class="callout callout-info">
+      <span class="callout-icon">ℹ️</span>
+      <div class="callout-body">
+        <strong>Auto-selection</strong> — the panel automatically picks the first free port when you create a server.
+        You only need to change it manually if you want a specific port number.
+        Once a port is assigned to a server it is removed from the available pool until that server is deleted.
+      </div>
+    </div>
+
+    <h2>9 — Firewall rules</h2>
     <div class="pre-label">bash</div>
     <pre><code>ufw allow 8080/tcp   <span class="cm"># Wings API</span>
 ufw allow 2022/tcp   <span class="cm"># SFTP</span>
